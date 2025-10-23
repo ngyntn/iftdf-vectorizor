@@ -1,4 +1,4 @@
-
+import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import TruncatedSVD
 import joblib
@@ -8,7 +8,7 @@ from datetime import datetime
 from config.db import close_db, connect_db
 from preprocess.eng_processor import clean_text
 
-
+TARGET_DIMS = 1000
 
 def query_articles_from_db():
     connection = connect_db()
@@ -37,6 +37,16 @@ def vectorize_articles(articles):
     n_components = min(1000, max(50, vocab_size))
     svd = TruncatedSVD(n_components=n_components)
     reduced_vectors = svd.fit_transform(tfidf_matrix)
+
+
+
+    current_dims = reduced_vectors.shape[1]
+    if current_dims < TARGET_DIMS:
+        print(f"Padding vectors from {current_dims} to {TARGET_DIMS} dims.")
+        # Tạo mảng zero để đệm
+        padding = np.zeros((reduced_vectors.shape[0], TARGET_DIMS - current_dims))
+        # Ghép mảng kết quả SVD với mảng zero
+        reduced_vectors = np.hstack((reduced_vectors, padding))
 
     # Lưu models
     joblib.dump(vectorizer, 'model/tfidf_model.pkl') # Đường dẫn dựa trên CWD (vị trí file thực thi)

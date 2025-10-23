@@ -1,6 +1,7 @@
 
 
 import joblib
+import numpy as np
 from elasticsearch import Elasticsearch
 from preprocess.eng_processor import clean_text
 
@@ -11,11 +12,19 @@ es = Elasticsearch(['http://localhost:9200'])
 vectorizer = joblib.load('../model/tfidf_model.pkl')
 svd = joblib.load('../model/svd_model.pkl')
 
+TARGET_DIMS = 1000
+
 
 def transform_query_to_vector(query_text):
     cleaned_query = clean_text(query_text)
     query_tfidf = vectorizer.transform([cleaned_query])
     query_reduced = svd.transform(query_tfidf)
+
+    current_dims = query_reduced.shape[1]
+    if current_dims < TARGET_DIMS:
+        padding = np.zeros((query_reduced.shape[0], TARGET_DIMS - current_dims))
+        query_reduced = np.hstack((query_reduced, padding))
+
     return query_reduced[0].tolist()
 
 
@@ -46,7 +55,7 @@ def knn_text_search(query_text, top_k=5, index_name="articles"):
 
 
 if __name__ == "__main__":
-    search_query = "vietnam sport sea games"
+    search_query = "donal trump"
     print(f"Searching for: '{search_query}'")
 
     recs = knn_text_search(search_query, top_k=5)

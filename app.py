@@ -10,7 +10,7 @@ app = Flask(__name__)
 scheduler = BackgroundScheduler()
 
 # Mode: chạy mỗi 1 phút
-scheduler.add_job(index_articles_job, 'interval', minutes=1, id='index_job')
+scheduler.add_job(index_articles_job, 'interval', seconds=10, id='index_job')
 
 scheduler.start()
 
