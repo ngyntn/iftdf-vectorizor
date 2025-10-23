@@ -193,26 +193,3 @@ def profile_update_job():
     finally:
         if connection:
             close_db(connection)
-
-
-if __name__ == "__main__":
-    # Đảm bảo index tồn tại trước khi bắt đầu
-    ensure_profile_index_exists()
-
-    scheduler = BackgroundScheduler()
-    scheduler.add_job(
-        profile_update_job,
-        'interval',
-        seconds=20,
-        id='profile_job'
-    )
-    scheduler.start()
-
-    print(f"Scheduler cập nhật hồ sơ đã bắt đầu (chạy mỗi {JOB_INTERVAL_MINUTES} phút).")
-    print("Nhấn Ctrl+C để thoát.")
-
-    try:
-        while True:
-            time.sleep(1)
-    except (KeyboardInterrupt, SystemExit):
-        scheduler.shutdown()
