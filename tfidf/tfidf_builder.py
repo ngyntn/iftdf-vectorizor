@@ -1,7 +1,4 @@
-import time
 
-from apscheduler.schedulers.background import BackgroundScheduler
-from flask import Flask
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import TruncatedSVD
 import joblib
@@ -10,7 +7,6 @@ from datetime import datetime
 
 from config.db import close_db, connect_db
 from preprocess.eng_processor import clean_text
-
 
 
 
@@ -43,8 +39,8 @@ def vectorize_articles(articles):
     reduced_vectors = svd.fit_transform(tfidf_matrix)
 
     # Lưu models
-    joblib.dump(vectorizer, 'tfidf_model.pkl')
-    joblib.dump(svd, 'svd_model.pkl')
+    joblib.dump(vectorizer, 'model/tfidf_model.pkl') # Đường dẫn dựa trên CWD (vị trí file thực thi)
+    joblib.dump(svd, 'model/svd_model.pkl')
 
     # Gán vector cho articles
     for i, article in enumerate(articles):
@@ -96,41 +92,9 @@ def index_to_es(articles):
 
     print("Articles indexed to ES.")
 
-
-# RUN APP _____________________________________________________________________________________________________________
-if __name__ == "__main__":
-
+def index_articles_job():
+    print(f"[{datetime.now()}] Running vectorized article job")
     articles = query_articles_from_db()
     articles = vectorize_articles(articles)
     index_to_es(articles)
-
-    print("Sleeping 10s ...........................................................")
-    time.sleep(10)
-
-    articles = query_articles_from_db()
-    articles = vectorize_articles(articles)
-    index_to_es(articles)
-
-# app = Flask(__name__)
-#
-# def index_articles_job():
-#     print(f"[{datetime.now()}] Running vectorized article job")
-#     articles = query_articles_from_db()
-#     articles = vectorize_articles(articles)
-#     index_to_es(articles)
-#     print(f"[{datetime.now()}] Vectorized article job successfully.\n")
-#
-# # Khởi tạo scheduler
-# scheduler = BackgroundScheduler()
-#
-# # MODE: chạy mỗi 1 phút
-# scheduler.add_job(index_articles_job, 'interval', minutes=1, id='index_job')
-#
-# scheduler.start()
-#
-# @app.route("/")
-# def home():
-#     return "Hello Flask"
-#
-# if __name__ == "__main__":
-#     app.run(debug=True)
+    print(f"[{datetime.now()}] Vectorized article job successfully.\n")
