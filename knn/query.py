@@ -9,8 +9,8 @@ from preprocess.eng_processor import clean_text
 es = Elasticsearch(['http://localhost:9200'])
 
 # Load models để transform text query
-vectorizer = joblib.load('../model/tfidf_model.pkl')
-svd = joblib.load('../model/svd_model.pkl')
+vectorizer = joblib.load('model/tfidf_model.pkl')
+svd = joblib.load('model/svd_model.pkl')
 
 TARGET_DIMS = 1000
 
@@ -43,19 +43,30 @@ def knn_text_search(query_text, top_k=5, index_name="articles"):
     response = es.search(
         index=index_name,
         knn=query,
-        _source=["article_id", "title"]
+        _source=["id", "title"],
+        size = top_k
     )
 
     # In kết quả
-    print("\n Results :", query_text)
+    results = []
+    print(f"\n Results for top_k {top_k} :{query_text}")
     for hit in response["hits"]["hits"]:
+        article_id = hit["_source"].get("id", "")
         title = hit["_source"]["title"]
         score = hit["_score"]
         print(f"- {title} (score={score:.4f})")
 
+        results.append({
+            "id": article_id,
+            "title": title,
+            "score": round(score, 4)
+        })
+
+    return results
+
 
 if __name__ == "__main__":
-    search_query = "donal trump"
+    search_query = ""
     print(f"Searching for: '{search_query}'")
 
     recs = knn_text_search(search_query, top_k=5)

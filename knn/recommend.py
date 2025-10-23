@@ -30,7 +30,8 @@ def get_recommendations_for_user(user_id: int, top_k: int = 5):
         response = es.search(
             index=ES_ARTICLE_INDEX,
             knn=knn_query,
-            _source=["title", "id"]
+            _source=["title", "id"],
+            size = top_k
         )
 
         results = []
