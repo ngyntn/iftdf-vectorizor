@@ -5,15 +5,16 @@ from flask import Flask, Blueprint, request, jsonify
 from knn.query import knn_text_search
 from knn.recommend import get_recommendations_for_user
 from profile.profile_vectorizer import profile_update_job
-from tfidf.tfidf_builder import query_articles_from_db, vectorize_articles, index_to_es, index_articles_job
+from tfidf.tfidf_builder import index_articles_full_job, index_articles_incremental_job
 
 app = Flask(__name__)
 
 
 scheduler = BackgroundScheduler()
 
-scheduler.add_job(index_articles_job, 'interval', seconds=20, id='index_job')
-scheduler.add_job(profile_update_job,'interval', seconds=30, id='profile_job')
+scheduler.add_job(index_articles_full_job, 'interval', seconds=60, id='full_index_job', max_instances=1, coalesce=True) # 1 day
+scheduler.add_job(index_articles_incremental_job, 'interval', seconds=30, id='incremental_index_job', max_instances=1, coalesce=True) # 1 hour
+scheduler.add_job(profile_update_job,'interval', seconds=3600, id='profile_job', max_instances=1, coalesce=True) # 1 hour
 
 scheduler.start()
 
@@ -31,7 +32,7 @@ def paginate_results(results, page: int, size: int):
 def home():
     return "Hello Flask"
 
-@app.route("/search/knn", methods=["GET"])
+@app.route("/articles/search/knn", methods=["GET"])
 def search_knn():
 
     key = request.args.get("key", "").strip()

@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from apscheduler.schedulers.background import BackgroundScheduler
 from elasticsearch import Elasticsearch
 
-from config.db import connect_db, close_db
+from config.db import get_connection, close_connection
 
 
 BASE_SCORES = {
@@ -170,7 +170,7 @@ def profile_update_job():
     print(f"[{datetime.now()}] Running profile update job")
     connection = None
     try:
-        connection = connect_db()
+        connection = get_connection()
 
         # Lấy danh sách user cần cập nhật
         active_users = get_active_users(connection, minutes_since_last_run=JOB_INTERVAL_MINUTES)
@@ -192,4 +192,4 @@ def profile_update_job():
         print(f"[{datetime.now()}] Error in profile_update_job: {e}")
     finally:
         if connection:
-            close_db(connection)
+            close_connection()
