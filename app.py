@@ -12,8 +12,8 @@ app = Flask(__name__)
 
 scheduler = BackgroundScheduler()
 
-scheduler.add_job(index_articles_full_job, 'interval', seconds=60, id='full_index_job', max_instances=1, coalesce=True) # 1 day
-scheduler.add_job(index_articles_incremental_job, 'interval', seconds=30, id='incremental_index_job', max_instances=1, coalesce=True) # 1 hour
+scheduler.add_job(index_articles_full_job, 'interval', seconds=86400, id='full_index_job', max_instances=1, coalesce=True) # 1 day
+scheduler.add_job(index_articles_incremental_job, 'interval', seconds=3600, id='incremental_index_job', max_instances=1, coalesce=True) # 1 hour
 scheduler.add_job(profile_update_job,'interval', seconds=3600, id='profile_job', max_instances=1, coalesce=True) # 1 hour
 
 scheduler.start()
@@ -71,14 +71,12 @@ def search_knn():
             }
         }), 500
 
-@app.route("/articles/recommend", methods=["GET"])
+@app.route("/articles/recommend", methods=["POST"])
 def recommend ():
 
-    user_id = int(request.args.get("user"))
-    page = int(request.args.get("page", 1))
-    size = int(request.args.get("size", 10))
-    top_k = page * size + 20
-
+    data = request.get_json()
+    user_id = int(data.get("user_id"))
+    read_ids = data.get("read_ids", [])
 
     if not user_id:
         print("Missing 'user' parameter")
@@ -91,15 +89,12 @@ def recommend ():
         }), 400
 
     try:
-        results = get_recommendations_for_user(user_id, top_k=top_k)
-        paginated = paginate_results(results, page, size)
+        results = get_recommendations_for_user(user_id, read_ids)
 
         return jsonify({
             "status": "success",
             "data": {
-                "page": page,
-                "size": size,
-                "results": paginated
+                "results": results
             }
         })
     except Exception as e:

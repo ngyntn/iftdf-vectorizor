@@ -23,12 +23,12 @@ def query_articles_from_db(full=True):
     cursor = connection.cursor()
     print(f"[{datetime.now()}] Start query {"full articles" if full else "articles is not indexed"}")
 
-    base_query = "SELECT id, title, content FROM articles WHERE id >= 10 AND moderation_status='public'"
+    base_query = "SELECT id, title, content, created_at FROM articles WHERE moderation_status='public'"
     query = f"{base_query} AND is_indexed=false" if not full else base_query
 
     cursor.execute(query)
     rows = cursor.fetchall()
-    articles = [{"id": row[0], "title": row[1], "content": row[1] + " " + row[2]} for row in rows]
+    articles = [{"id": row[0], "title": row[1], "content": row[1] + " " + row[2], "created_at": row[3]} for row in rows]
 
     print(f"[{datetime.now()}] Queried {len(articles)} articles from DB.")
     return articles
@@ -127,6 +127,7 @@ def index_to_es(articles, full=True):
                     "properties": {
                         "id": {"type": "integer"},
                         "title": {"type": "text"},
+                        "created_at": {"type": "date"},
                         "vector": {"type": "dense_vector", "dims": dims}
                     }
                 }
@@ -145,6 +146,7 @@ def index_to_es(articles, full=True):
             doc = {
                 "id": article['id'],
                 "title": article['title'],
+                "created_at": article['created_at'],
                 "vector": article['vector']
             }
             es.index(index=ES_ARTICLE_INDEX, id=article['id'], body=doc)
