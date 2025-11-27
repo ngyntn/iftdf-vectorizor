@@ -14,7 +14,7 @@ scheduler = BackgroundScheduler()
 
 scheduler.add_job(index_articles_full_job, 'interval', seconds=86400, id='full_index_job', max_instances=1, coalesce=True) # 1 day
 scheduler.add_job(index_articles_incremental_job, 'interval', seconds=3600, id='incremental_index_job', max_instances=1, coalesce=True) # 1 hour
-scheduler.add_job(profile_update_job,'interval', seconds=3600, id='profile_job', max_instances=1, coalesce=True) # 1 hour
+scheduler.add_job(profile_update_job,'interval', seconds=60, id='profile_job', max_instances=1, coalesce=True) # 1 hour
 
 scheduler.start()
 

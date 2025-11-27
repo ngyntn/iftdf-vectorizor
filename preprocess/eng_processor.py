@@ -13,6 +13,12 @@ nltk.download('averaged_perceptron_tagger_eng', quiet=True)
 nltk.download('punkt', quiet=True)
 nltk.download('punkt_tab', quiet=True)
 
+
+lemmatizer = WordNetLemmatizer()
+stemmer = PorterStemmer()
+stop_words = set(stopwords.words('english'))
+
+
 # Preprocessing - Làm sạch text
 def get_wordnet_pos(word):
     # Lấy POS tag cho lemmatization (tối ưu tiếng Anh).
@@ -22,9 +28,7 @@ def get_wordnet_pos(word):
 
 
 def clean_text(text):
-    lemmatizer = WordNetLemmatizer()
-    stemmer = PorterStemmer()
-    stop_words = set(stopwords.words('english'))
+    if not text: return 0
     words = nltk.word_tokenize(text.lower())  # Tokenize chuẩn
     words = [lemmatizer.lemmatize(stemmer.stem(word), get_wordnet_pos(word))
              for word in words

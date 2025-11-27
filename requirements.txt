@@ -1,6 +1,16 @@
 Flask
-mysql-connector-python
-python-dotenv
-underthesea
-scikit-learn
 apscheduler
+
+# Data Processing & AI
+numpy
+scikit-learn
+joblib
+nltk
+
+# Database & Search Engine
+mysql-connector-python
+elasticsearch==8.11.0
+python-dotenv
+
+# Task Queue & Broker
+celery[redis]
