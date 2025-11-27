@@ -61,8 +61,8 @@ The project requires **Python 3.13**. Follow these steps to set up the environme
 **Step A: Clone and Enter Project**
 
 ```bash
-git clone <your-repo-url>
-cd <project-folder>
+git clone https://github.com/ngyntn/iftdf-vectorizor.git
+cd iftdf-vectorizor
 ```
 
 **Step B: Create Virtual Environment**
